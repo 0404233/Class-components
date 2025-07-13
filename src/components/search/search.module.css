@@ -1,0 +1,17 @@
+.inputForm {
+  display: flex;
+  width: 50%;
+  gap: 12px;
+}
+
+.inputField {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 1em;
+
+  &:focus {
+    border-color: #646cff;
+    outline: none;
+  }
+}

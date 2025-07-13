@@ -1,35 +1,32 @@
-import { useState } from 'react';
-import reactLogo from './assets/react.svg';
-import viteLogo from '/vite.svg';
-import './App.css';
+import { Component } from 'react';
+import Header from './components/header/Header';
+import Search from './components/search/Search';
+import getApiInfo from './api';
 
-function App() {
-  const [count, setCount] = useState(0);
+export default class App extends Component {
+  componentDidMount() {
+    const input = localStorage.getItem('searchInput') || '';
+    this.handleSearch(input);
+  }
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  );
+  handleSearch = async (input: string) => {
+    try {
+      const results = await getApiInfo(input);
+      console.log(results);
+    } catch (e) {
+      if (e instanceof Error) {
+        throw new Error(e.message);
+      } else {
+        throw new Error('Unknown error occurred');
+      }
+    }
+  };
+
+  render() {
+    return (
+      <Header>
+        <Search onSearch={this.handleSearch} />
+      </Header>
+    );
+  }
 }
-
-export default App;
