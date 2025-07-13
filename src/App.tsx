@@ -24,7 +24,7 @@ type State = {
   searchInput: string;
 };
 
-export default class App extends Component<undefined, State> {
+export default class App extends Component<Record<string, never>, State> {
   state: State = {
     items: [],
     loading: false,
