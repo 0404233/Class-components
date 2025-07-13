@@ -1,0 +1,22 @@
+.errorMessage {
+  color: red;
+}
+
+.cardListWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.buttonsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.pagginationButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}

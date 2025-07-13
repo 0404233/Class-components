@@ -1,6 +1,6 @@
 .inputForm {
   display: flex;
-  width: 50%;
+  min-width: 50%;
   gap: 12px;
 }
 

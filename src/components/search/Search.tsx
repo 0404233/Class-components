@@ -29,6 +29,7 @@ export default class Search extends Component<Props, State> {
     return (
       <form className={styles.inputForm}>
         <input
+          placeholder="Write full pokemon name"
           value={this.state.searcInput}
           onChange={this.handleChange}
           className={styles.inputField}
