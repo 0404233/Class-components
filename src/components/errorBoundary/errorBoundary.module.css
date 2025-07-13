@@ -1,0 +1,15 @@
+.errorMessage {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 0 solid;
+  border-radius: 8px;
+  font-size: 1rem;
+  width: 50%;
+  height: 100px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: red;
+}
