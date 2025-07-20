@@ -67,8 +67,6 @@ export default class App extends Component<Record<string, never>, State> {
     } catch (e: unknown) {
       if (e instanceof Error) {
         this.setState({ error: e.message });
-      } else {
-        this.setState({ error: 'An unknown error occurred' });
       }
     } finally {
       this.setState({ loading: false });
@@ -98,7 +96,7 @@ export default class App extends Component<Record<string, never>, State> {
           <Search onSearch={(input) => this.handleSearch(input, 0)} />
         </Header>
         <div className={styles.cardListWrapper}>
-          {loading && <p>Loading...</p>}
+          {loading && <p className={styles.loader} data-testid="loader"></p>}
           {error && <p className={styles.errorMessage}>{error}</p>}
           {!loading && !error && <CardList items={items} />}
           <div className={styles.buttonsBlock}>
