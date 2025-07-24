@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import Header from './components/header/Header';
 import Search from './components/search/Search';
 import CardList from './components/CardList';
@@ -14,36 +14,28 @@ type PokemonItem = {
   weight?: number;
 };
 
-type State = {
-  items: { name: string; description: Description }[];
-  loading: boolean;
-  error: string | null;
-  triggerRenderError: boolean;
-  offset: number;
-  limit: number;
-  searchInput: string;
-};
+export default function App() {
+  const [items, setItems] = useState<
+    { name: string; description: Description | null }[]
+  >([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [triggerRenderError, setTriggerRenderError] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const limit = 10;
+  const [searchInput, setSearchInput] = useState('');
 
-export default class App extends Component<Record<string, never>, State> {
-  state: State = {
-    items: [],
-    loading: false,
-    error: null,
-    triggerRenderError: false,
-    offset: 0,
-    limit: 10,
-    searchInput: '',
-  };
-
-  componentDidMount() {
+  useEffect(() => {
     const input = localStorage.getItem('searchInput') || '';
-    this.handleSearch(input, this.state.offset);
-  }
+    handleSearch(input, offset);
+  }, []);
 
-  handleSearch = async (input: string, offset = 0) => {
-    this.setState({ loading: true, error: null, searchInput: input });
+  const handleSearch = async (input: string, newOffset = 0) => {
+    setLoading(true);
+    setError(null);
+    setSearchInput(input);
     try {
-      const results = await getApiInfo(input, offset, this.state.limit);
+      const results = await getApiInfo(input, newOffset, limit);
       const mapped = results.map((item: PokemonItem) => {
         const hasData =
           item.base_experience !== undefined ||
@@ -63,65 +55,57 @@ export default class App extends Component<Record<string, never>, State> {
             : null,
         };
       });
-      this.setState({ items: mapped, offset });
+      setItems(mapped);
+      setOffset(newOffset);
     } catch (e: unknown) {
       if (e instanceof Error) {
-        this.setState({ error: e.message });
+        setError(e.message);
       }
     } finally {
-      this.setState({ loading: false });
+      setLoading(false);
     }
   };
 
-  handlePrev = () => {
-    const newOffset = Math.max(0, this.state.offset - this.state.limit);
-    this.handleSearch('', newOffset);
+  const handlePrev = () => {
+    const newOffset = Math.max(0, offset - limit);
+    handleSearch('', newOffset);
   };
 
-  handleNext = () => {
-    const newOffset = this.state.offset + this.state.limit;
-    this.handleSearch('', newOffset);
+  const handleNext = () => {
+    const newOffset = offset + limit;
+    handleSearch('', newOffset);
   };
 
-  render() {
-    const { loading, items, error, triggerRenderError } = this.state;
+  if (triggerRenderError) {
+    throw new Error();
+  }
 
-    if (triggerRenderError) {
-      throw new Error();
-    }
-
-    return (
-      <>
-        <Header>
-          <Search onSearch={(input) => this.handleSearch(input, 0)} />
-        </Header>
-        <div className={styles.cardListWrapper}>
-          {loading && <p className={styles.loader} data-testid="loader"></p>}
-          {error && <p className={styles.errorMessage}>{error}</p>}
-          {!loading && !error && <CardList items={items} />}
-          <div className={styles.buttonsBlock}>
-            <div className={styles.pagginationButtons}>
-              <button
-                onClick={this.handlePrev}
-                disabled={
-                  this.state.offset === 0 || this.state.searchInput !== ''
-                }
-              >
-                Prev
-              </button>
-              <button
-                onClick={this.handleNext}
-                disabled={this.state.searchInput !== ''}
-              >
-                Next
-              </button>
-            </div>
-            <button onClick={() => this.setState({ triggerRenderError: true })}>
-              Trigger Render Error
+  return (
+    <>
+      <Header>
+        <Search onSearch={(input) => handleSearch(input, 0)} />
+      </Header>
+      <div className={styles.cardListWrapper}>
+        {loading && <p className={styles.loader} data-testid="loader"></p>}
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        {!loading && !error && <CardList items={items} />}
+        <div className={styles.buttonsBlock}>
+          <div className={styles.pagginationButtons}>
+            <button
+              onClick={handlePrev}
+              disabled={offset === 0 || searchInput !== ''}
+            >
+              Prev
+            </button>
+            <button onClick={handleNext} disabled={searchInput !== ''}>
+              Next
             </button>
           </div>
+          <button onClick={() => setTriggerRenderError(true)}>
+            Trigger Render Error
+          </button>
         </div>
-      </>
-    );
-  }
+      </div>
+    </>
+  );
 }
