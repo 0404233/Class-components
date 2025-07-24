@@ -1,41 +1,39 @@
-import React, { Component } from 'react';
+import { useState, useEffect } from 'react';
+import type { ReactElement } from 'react';
 import styles from './search.module.css';
 
 type Props = {
   onSearch: (input: string) => void;
 };
 
-type State = {
-  searcInput: string;
-};
+export default function Search({ onSearch }: Props): ReactElement {
+  const [searchInput, setSearchInput] = useState('');
 
-export default class Search extends Component<Props, State> {
-  state: State = {
-    searcInput: localStorage.getItem('searchInput') || '',
+  useEffect(() => {
+    const stored = localStorage.getItem('searchInput') || '';
+    setSearchInput(stored);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
   };
 
-  handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    this.setState({ searcInput: e.target.value });
-  };
-
-  handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    const trimmed = this.state.searcInput.trim();
+    const trimmed = searchInput.trim();
     localStorage.setItem('searchInput', trimmed);
-    this.props.onSearch(trimmed);
+    onSearch(trimmed);
   };
 
-  render() {
-    return (
-      <form className={styles.inputForm}>
-        <input
-          placeholder="Write full pokemon name"
-          value={this.state.searcInput}
-          onChange={this.handleChange}
-          className={styles.inputField}
-        />
-        <button onClick={this.handleClick}>Search</button>
-      </form>
-    );
-  }
+  return (
+    <form className={styles.inputForm}>
+      <input
+        placeholder="Write full pokemon name"
+        value={searchInput}
+        onChange={handleChange}
+        className={styles.inputField}
+      />
+      <button onClick={handleClick}>Search</button>
+    </form>
+  );
 }
