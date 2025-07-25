@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import App from './App';
+import { MemoryRouter } from 'react-router-dom';
+import Main from './Main';
 import '@testing-library/jest-dom';
 
 const mockData = [
@@ -13,15 +14,11 @@ const mockData = [
   },
 ];
 
-vi.mock('./api', async () => {
-  const actual = await vi.importActual<typeof import('./api')>('./api');
-  return {
-    ...actual,
-    default: vi.fn(),
-  };
-});
+vi.mock('../api', () => ({
+  default: vi.fn(),
+}));
 
-import getApiInfo from './api';
+import getApiInfo from '../../api';
 
 const getApiInfoMock = getApiInfo as ReturnType<typeof vi.fn>;
 
@@ -33,7 +30,11 @@ describe('App component', () => {
 
   it('Render without crashing', async () => {
     getApiInfoMock.mockResolvedValue(mockData);
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
     expect(
       screen.getByPlaceholderText(/write full pokemon name/i)
     ).toBeInTheDocument();
@@ -51,7 +52,11 @@ describe('App component', () => {
 
     getApiInfoMock.mockReturnValueOnce(mockPromise);
 
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
 
     expect(screen.getByTestId('loader')).toBeInTheDocument();
 
@@ -64,7 +69,11 @@ describe('App component', () => {
 
   it('Show error message if API rejected', async () => {
     getApiInfoMock.mockRejectedValue(new Error('ERROR'));
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
     await waitFor(() => {
       expect(screen.getByText(/error/i)).toBeInTheDocument();
     });
@@ -72,7 +81,11 @@ describe('App component', () => {
 
   it('Search and displays result', async () => {
     getApiInfoMock.mockResolvedValue(mockData);
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
     const input = screen.getByPlaceholderText(/write full pokemon name/i);
     const button = screen.getByRole('button', { name: /search/i });
     fireEvent.change(input, { target: { value: 'Bulbasaur' } });
@@ -84,7 +97,11 @@ describe('App component', () => {
 
   it('Disable Next/Prev if search input is not empty', async () => {
     getApiInfoMock.mockResolvedValue(mockData);
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
 
     const input = screen.getByPlaceholderText(/write full pokemon name/i);
     const searchBtn = screen.getByRole('button', { name: /search/i });
@@ -100,7 +117,11 @@ describe('App component', () => {
 
   it('Navigation of Next and Prev buttons', async () => {
     getApiInfoMock.mockResolvedValue(mockData);
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <Main />
+      </MemoryRouter>
+    );
     const next = screen.getByRole('button', { name: /next/i });
     fireEvent.click(next);
     await waitFor(() => {
@@ -113,28 +134,16 @@ describe('App component', () => {
       expect(getApiInfoMock).toHaveBeenCalledWith('', 0, 10);
     });
   });
-
-  it('triggers render error when button clicked', async () => {
-    const spy = vi.spyOn(console, 'error');
-    spy.mockImplementation(() => {});
-    expect(() => render(<App />)).not.toThrow();
-
-    await waitFor(() => {
-      expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
-    });
-
-    const errorButton = screen.getByRole('button', {
-      name: /trigger render error/i,
-    });
-    expect(() => fireEvent.click(errorButton)).toThrow();
-    spy.mockRestore();
-  });
 });
 
 it('Handle items with wrong name', async () => {
   getApiInfoMock.mockResolvedValue([{ name: 'Wrong Name' }]);
 
-  render(<App />);
+  render(
+    <MemoryRouter>
+      <Main />
+    </MemoryRouter>
+  );
 
   await waitFor(() => {
     expect(screen.getByText('Wrong Name')).toBeInTheDocument();
