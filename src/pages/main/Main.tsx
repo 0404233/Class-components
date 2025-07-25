@@ -118,9 +118,9 @@ export default function MainPage() {
 
   return (
     <div className={styles.masterDetailLayout}>
-      <div className={styles.leftPane}>
+      <div className={styles.leftPane} data-testid="left-pane">
         <Search onSearch={(input) => handleSearch(input, 0)} />
-        {loading && <p className={styles.loader}></p>}
+        {loading && <p className={styles.loader} data-testid="loader"></p>}
         {error && <p className={styles.errorMessage}>{error}</p>}
         {!loading && !error && (
           <CardList items={items} onCardClick={handleCardClick} />
@@ -141,7 +141,7 @@ export default function MainPage() {
         </div>
       </div>
       {selectedDetails && (
-        <div className={styles.rightPane}>
+        <div className={styles.rightPane} data-testid="right-pane">
           <button onClick={closeDetails}>Close</button>
           {detailsLoading ? (
             <p>Loading details...</p>

@@ -1,0 +1,54 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`CardList component > matches snapshot 1`] = `
+<div>
+  <div>
+    <div
+      class="_card_a9fe5f"
+    >
+      <h3>
+        Bulbasaur
+      </h3>
+      <p>
+        Base experience: 
+        64
+      </p>
+      <p>
+        Height: 
+        7
+      </p>
+      <p>
+        Is default: 
+        Yes
+      </p>
+      <p>
+        Weight: 
+        69
+      </p>
+    </div>
+    <div
+      class="_card_a9fe5f"
+    >
+      <h3>
+        Ivysaur
+      </h3>
+      <p>
+        Base experience: 
+        142
+      </p>
+      <p>
+        Height: 
+        10
+      </p>
+      <p>
+        Is default: 
+        Yes
+      </p>
+      <p>
+        Weight: 
+        130
+      </p>
+    </div>
+  </div>
+</div>
+`;
