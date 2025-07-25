@@ -1,0 +1,15 @@
+.notFound {
+  padding: 3rem;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.notFound a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.notFound a:hover {
+  text-decoration: underline;
+}
