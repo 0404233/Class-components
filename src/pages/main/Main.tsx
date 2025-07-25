@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import Search from '../../components/search/Search';
 import CardList from '../../components/CardList';
 import getApiInfo from '../../api';
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 import styles from './Main.module.css';
 import type { Description } from '../../types';
 
@@ -25,9 +26,7 @@ export default function MainPage() {
   const [error, setError] = useState<string | null>(null);
   const [detailsData, setDetailsData] = useState<Item | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [searchInput, setSearchInput] = useState(
-    () => localStorage.getItem('searchInput') || ''
-  );
+  const [searchInput, setSearchInput] = useLocalStorage('searchInput', '');
   const [searchParams, setSearchParams] = useSearchParams();
 
   const limit = 10;
@@ -51,7 +50,6 @@ export default function MainPage() {
     setLoading(true);
     setError(null);
     setSearchInput(input);
-    localStorage.setItem('searchInput', input);
 
     try {
       const results = await getApiInfo(input, customOffset, limit);
