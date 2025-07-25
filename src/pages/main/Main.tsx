@@ -119,7 +119,13 @@ export default function MainPage() {
   return (
     <div className={styles.masterDetailLayout}>
       <div className={styles.leftPane} data-testid="left-pane">
-        <Search onSearch={(input) => handleSearch(input, 0)} />
+        <Search
+          onSearch={(input) => {
+            if (input.trim() !== '') {
+              handleSearch(input, 0);
+            }
+          }}
+        />
         {loading && <p className={styles.loader} data-testid="loader"></p>}
         {error && <p className={styles.errorMessage}>{error}</p>}
         {!loading && !error && (
