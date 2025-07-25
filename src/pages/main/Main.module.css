@@ -1,3 +1,10 @@
+.masterDetailLayout {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 50px;
+}
+
 .errorMessage {
   text-align: center;
   color: red;

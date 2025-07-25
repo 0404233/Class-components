@@ -1,15 +1,20 @@
 import type { ReactElement } from 'react';
-import type { Description } from '../../types';
 import styles from './card.module.css';
+import type { Description } from '../../types';
 
 type Props = {
   name: string;
   description?: Description | null;
+  onClick?: () => void;
 };
 
-export default function Card({ name, description }: Props): ReactElement {
+export default function Card({
+  name,
+  description,
+  onClick,
+}: Props): ReactElement {
   return (
-    <div className={styles.card}>
+    <div className={styles.card} onClick={onClick}>
       <h3>{name}</h3>
       {description && (
         <>

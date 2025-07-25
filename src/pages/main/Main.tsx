@@ -19,27 +19,39 @@ type PokemonItem = {
   weight?: number;
 };
 
-const MainPage = () => {
+export default function MainPage() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [searchInput, setSearchInput] = useState('');
+  const [detailsData, setDetailsData] = useState<Item | null>(null);
+  const [detailsLoading, setDetailsLoading] = useState(false);
+  const [searchInput, setSearchInput] = useState(
+    () => localStorage.getItem('searchInput') || ''
+  );
   const [searchParams, setSearchParams] = useSearchParams();
 
   const limit = 10;
   const page = parseInt(searchParams.get('page') || '1', 10);
   const offset = (page - 1) * limit;
+  const selectedDetails = searchParams.get('details') || '';
 
   useEffect(() => {
-    const savedInput = localStorage.getItem('searchInput') || '';
-    setSearchInput(savedInput);
-    handleSearch(savedInput, offset);
-  }, [page]);
+    handleSearch(searchInput, offset);
+  }, [page, searchInput]);
+
+  useEffect(() => {
+    if (selectedDetails) {
+      fetchDetails(selectedDetails);
+    } else {
+      setDetailsData(null);
+    }
+  }, [selectedDetails]);
 
   const handleSearch = async (input: string, customOffset = 0) => {
     setLoading(true);
     setError(null);
     setSearchInput(input);
+    localStorage.setItem('searchInput', input);
 
     try {
       const results = await getApiInfo(input, customOffset, limit);
@@ -68,8 +80,29 @@ const MainPage = () => {
       if (e instanceof Error) {
         setError(e.message);
       }
+      setItems([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDetails = async (name: string) => {
+    setDetailsLoading(true);
+    try {
+      const [data] = await getApiInfo(name, 0, 1);
+      setDetailsData({
+        name: data.name,
+        description: {
+          base_experience: data.base_experience,
+          height: data.height,
+          is_default: data.is_default,
+          weight: data.weight,
+        },
+      });
+    } catch {
+      setDetailsData(null);
+    } finally {
+      setDetailsLoading(false);
     }
   };
 
@@ -77,14 +110,24 @@ const MainPage = () => {
     setSearchParams({ page: newPage.toString() });
   };
 
+  const handleCardClick = (name: string) => {
+    setSearchParams({ page: page.toString(), details: name });
+  };
+
+  const closeDetails = () => {
+    setSearchParams({ page: page.toString() });
+  };
+
   return (
-    <div className={styles.wrapper}>
-      <Search onSearch={(input) => handleSearch(input, 0)} />
-      {loading && <p className={styles.loader} data-testid="loader"></p>}
-      {error && <p className={styles.errorMessage}>{error}</p>}
-      {!loading && !error && <CardList items={items} />}
-      <div className={styles.buttonsBlock}>
-        <div className={styles.pagginationButtons}>
+    <div className={styles.masterDetailLayout}>
+      <div className={styles.leftPane}>
+        <Search onSearch={(input) => handleSearch(input, 0)} />
+        {loading && <p className={styles.loader}></p>}
+        {error && <p className={styles.errorMessage}>{error}</p>}
+        {!loading && !error && (
+          <CardList items={items} onCardClick={handleCardClick} />
+        )}
+        <div className={styles.buttonsBlock}>
           <button
             onClick={() => goToPage(page - 1)}
             disabled={page === 1 || searchInput !== ''}
@@ -99,8 +142,26 @@ const MainPage = () => {
           </button>
         </div>
       </div>
+      {selectedDetails && (
+        <div className={styles.rightPane}>
+          <button onClick={closeDetails}>Close</button>
+          {detailsLoading ? (
+            <p>Loading details...</p>
+          ) : detailsData ? (
+            <div>
+              <h3>{detailsData.name}</h3>
+              <p>Base experience: {detailsData.description?.base_experience}</p>
+              <p>Height: {detailsData.description?.height}</p>
+              <p>
+                Is default: {detailsData.description?.is_default ? 'Yes' : 'No'}
+              </p>
+              <p>Weight: {detailsData.description?.weight}</p>
+            </div>
+          ) : (
+            <p>Details not found.</p>
+          )}
+        </div>
+      )}
     </div>
   );
-};
-
-export default MainPage;
+}
