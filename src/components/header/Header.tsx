@@ -1,21 +1,23 @@
-import { Component } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, ReactElement } from 'react';
 import logo from './../../assets/logo.png';
 import styles from './header.module.css';
+import { Link } from 'react-router-dom';
 
 type Props = {
   children?: ReactNode;
 };
 
-export default class Header extends Component<Props> {
-  render() {
-    return (
-      <header className={styles.header}>
-        {this.props.children}
-        <div className={styles.logo}>
-          <img src={logo} alt="Logo" className={styles.logoImage} />
-        </div>
-      </header>
-    );
-  }
+export default function Header({ children }: Props): ReactElement {
+  return (
+    <header className={styles.header}>
+      <nav className={styles.nav}>
+        <Link to="/">Home</Link>
+        <Link to="/about">About</Link>
+      </nav>
+      {children}
+      <div className={styles.logo}>
+        <img src={logo} alt="Logo" className={styles.logoImage} />
+      </div>
+    </header>
+  );
 }

@@ -1,4 +1,12 @@
+.masterDetailLayout {
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  gap: 50px;
+}
+
 .errorMessage {
+  text-align: center;
   color: red;
 }
 
@@ -22,6 +30,7 @@
 }
 
 .loader {
+  margin: 20px auto;
   transform: rotateZ(45deg);
   perspective: 1000px;
   border-radius: 50%;
