@@ -26,7 +26,7 @@ export default function Search({ onSearch }: Props): ReactElement {
     <form className={styles.inputForm}>
       <input
         placeholder="Write full pokemon name"
-        value={searchInput}
+        value={searchInput.replace(/"/g, '')}
         onChange={handleChange}
         className={styles.inputField}
       />
