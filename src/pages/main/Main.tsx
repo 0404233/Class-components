@@ -121,9 +121,7 @@ export default function MainPage() {
       <div className={styles.leftPane} data-testid="left-pane">
         <Search
           onSearch={(input) => {
-            if (input.trim() !== '') {
-              handleSearch(input, 0);
-            }
+            handleSearch(input, 0);
           }}
         />
         {loading && <p className={styles.loader} data-testid="loader"></p>}
