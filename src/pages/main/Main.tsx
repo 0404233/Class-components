@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Search from '../../components/search/Search';
-import CardList from '../../components/CardList';
+import CardList from '../../components/cardList/CardList';
 import getApiInfo from '../../api';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import styles from './Main.module.css';
