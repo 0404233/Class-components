@@ -81,3 +81,34 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+:root[data-theme='light'] {
+  --bg-color: white;
+  --text-color: #242424;
+  --elems-color: rgb(238, 238, 238, 0.5);
+}
+
+:root[data-theme='dark'] {
+  --bg-color: #242424;
+  --text-color: rgb(238, 238, 238);
+  --elems-color: rgb(24, 24, 24, 0.5);
+}
+
+body {
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+button {
+  color: var(--text-color);
+  background-color: var(--elems-color);
+}
+
+input {
+  background-color: var(--elems-color);
+  color: var(--text-color);
+}
+
+input::placeholder {
+  color: var(--text-color);
+}

@@ -1,4 +1,4 @@
-import { useSelectionStore } from '../store/useSelectionStore';
+import { useSelectionStore } from '../../store/useSelectionStore';
 import styles from './SelectedItems.module.css';
 
 export default function SelectedItemsFlyout() {

@@ -29,6 +29,7 @@ export default function Card({
   return (
     <div className={styles.card} onClick={onClick}>
       <input
+        className={styles.checkbox}
         type="checkbox"
         checked={selected}
         onChange={handleCheckboxChange}
