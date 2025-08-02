@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type SelectedItemsState = {
+export type SelectedItemsState = {
   selected: Set<string>;
   selectItem: (name: string) => void;
   unselectItem: (name: string) => void;
