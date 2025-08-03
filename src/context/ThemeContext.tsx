@@ -9,13 +9,13 @@ type ThemeContextType = {
 };
 
 export const ThemeContext = createContext<ThemeContextType>({
-  theme: 'light',
+  theme: 'dark',
   setTheme: () => {},
 });
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(
-    (localStorage.getItem('app-theme') as Theme) || 'light'
+    (localStorage.getItem('app-theme') as Theme) || 'dark'
   );
 
   useEffect(() => {
