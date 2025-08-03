@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Search from '../../components/search/Search';
-import CardList from '../../components/CardList';
+import CardList from '../../components/cardList/CardList';
 import getApiInfo from '../../api';
 import { useLocalStorage } from '../../hooks/useLocalStorage';
 import styles from './Main.module.css';
@@ -121,9 +121,7 @@ export default function MainPage() {
       <div className={styles.leftPane} data-testid="left-pane">
         <Search
           onSearch={(input) => {
-            if (input.trim() !== '') {
-              handleSearch(input, 0);
-            }
+            handleSearch(input, 0);
           }}
         />
         {loading && <p className={styles.loader} data-testid="loader"></p>}

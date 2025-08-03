@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
-import Router from './Router';
+import Router from './AppRoutes';
 import '@testing-library/jest-dom';
 
 vi.mock('./pages/main/Main', () => ({

@@ -1,9 +1,9 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import ErrorBoundary from './components/errorBoundary/ErrorBoundary.tsx';
-import { BrowserRouter } from 'react-router-dom';
 import './index.css';
 import App from './App.tsx';
+import { ThemeProvider } from './context/ThemeContext';
 
 const rootElement = document.getElementById('root');
 
@@ -13,10 +13,10 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <BrowserRouter>
-      <ErrorBoundary>
+    <ErrorBoundary>
+      <ThemeProvider>
         <App />
-      </ErrorBoundary>
-    </BrowserRouter>
+      </ThemeProvider>
+    </ErrorBoundary>
   </StrictMode>
 );

@@ -1,51 +1,60 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import Card from './Card';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import '@testing-library/jest-dom';
+import { useSelectionStore } from '../../store/useSelectionStore';
 
-describe('Card component', () => {
-  const props = {
-    name: 'Bulbasaur',
-  };
+beforeEach(() => {
+  useSelectionStore.getState().clearAll();
+});
 
-  it('Renders the name', () => {
-    render(<Card {...props} />);
-    expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
+describe('Card component interactions', () => {
+  const name = 'Charmander';
+
+  it('Renders an unchecked checkbox by default', () => {
+    render(<Card name={name} />);
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).not.toBeChecked();
   });
 
-  it('Card without description', () => {
-    render(<Card {...props} />);
-    expect(screen.queryByText(/Base experience:/)).toBeNull();
-    expect(screen.queryByText(/Height:/)).toBeNull();
-    expect(screen.queryByText(/Is default:/)).toBeNull();
-    expect(screen.queryByText(/Weight:/)).toBeNull();
+  it('Toggles selection on checkbox click', () => {
+    render(<Card name={name} />);
+    const checkbox = screen.getByRole('checkbox');
+
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
+    expect(useSelectionStore.getState().selected.has(name)).toBe(true);
+
+    fireEvent.click(checkbox);
+    expect(checkbox).not.toBeChecked();
+    expect(useSelectionStore.getState().selected.has(name)).toBe(false);
   });
 
-  it('Card with description', () => {
-    const description = {
-      base_experience: 64,
-      height: 7,
-      is_default: true,
-      weight: 69,
-    };
+  it('Stops checkbox click from triggering card onClick', () => {
+    const onClick = vi.fn();
+    render(<Card name={name} onClick={onClick} />);
+    const checkbox = screen.getByRole('checkbox');
 
-    render(<Card {...props} description={description} />);
-
-    expect(screen.getByText('Base experience: 64')).toBeInTheDocument();
-    expect(screen.getByText('Height: 7')).toBeInTheDocument();
-    expect(screen.getByText('Is default: Yes')).toBeInTheDocument();
-    expect(screen.getByText('Weight: 69')).toBeInTheDocument();
+    fireEvent.click(checkbox);
+    expect(onClick).not.toHaveBeenCalled();
   });
 
-  it('Change field "Is default" depending on boolean parameter', () => {
-    const description = {
-      base_experience: 64,
-      height: 7,
-      is_default: false,
-      weight: 69,
-    };
+  it('Calls onClick when card itself is clicked (excluding checkbox)', () => {
+    const onClick = vi.fn();
+    render(<Card name={name} onClick={onClick} />);
 
-    render(<Card {...props} description={description} />);
-    expect(screen.getByText('Is default: No')).toBeInTheDocument();
+    const card = screen.getByText(name).closest('div');
+    if (!card) {
+      throw new Error('Card element not found');
+    }
+    fireEvent.click(card);
+    expect(onClick).toHaveBeenCalled();
+  });
+
+  it('Renders a checked checkbox when item is pre-selected in store', () => {
+    useSelectionStore.getState().selectItem(name);
+    render(<Card name={name} />);
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).toBeChecked();
   });
 });

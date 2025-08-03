@@ -9,6 +9,10 @@
     box-shadow 0.2s ease;
 }
 
+.checkbox {
+  accent-color: #646cff;
+}
+
 .card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);

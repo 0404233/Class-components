@@ -3,7 +3,7 @@ import About from './pages/about/About';
 import Error from './pages/error/Error';
 import Main from './pages/main/Main';
 
-export default function Router() {
+export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Main />} />
