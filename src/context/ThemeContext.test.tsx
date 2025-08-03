@@ -23,21 +23,7 @@ describe('ThemeProvider', () => {
     document.documentElement.removeAttribute('data-theme');
   });
 
-  it('defaults to light theme when no preference in localStorage', () => {
-    render(
-      <ThemeProvider>
-        <TestComponent />
-      </ThemeProvider>
-    );
-
-    expect(screen.getByText('Current theme: light')).toBeInTheDocument();
-    expect(localStorage.getItem('app-theme')).toBe('light');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
-  });
-
-  it('uses theme from localStorage if available', () => {
-    localStorage.setItem('app-theme', 'dark');
-
+  it('defaults to dark theme when no preference in localStorage', () => {
     render(
       <ThemeProvider>
         <TestComponent />
@@ -45,7 +31,21 @@ describe('ThemeProvider', () => {
     );
 
     expect(screen.getByText('Current theme: dark')).toBeInTheDocument();
+    expect(localStorage.getItem('app-theme')).toBe('dark');
     expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('uses theme from localStorage if available', () => {
+    localStorage.setItem('app-theme', 'light');
+
+    render(
+      <ThemeProvider>
+        <TestComponent />
+      </ThemeProvider>
+    );
+
+    expect(screen.getByText('Current theme: light')).toBeInTheDocument();
+    expect(document.documentElement.getAttribute('data-theme')).toBe('light');
   });
 
   it('updates theme and persists it to localStorage and DOM', async () => {
@@ -57,14 +57,14 @@ describe('ThemeProvider', () => {
       </ThemeProvider>
     );
 
-    await user.click(screen.getByText('Switch to dark'));
-    expect(screen.getByText('Current theme: dark')).toBeInTheDocument();
-    expect(localStorage.getItem('app-theme')).toBe('dark');
-    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
-
     await user.click(screen.getByText('Switch to light'));
     expect(screen.getByText('Current theme: light')).toBeInTheDocument();
     expect(localStorage.getItem('app-theme')).toBe('light');
     expect(document.documentElement.getAttribute('data-theme')).toBe('light');
+
+    await user.click(screen.getByText('Switch to dark'));
+    expect(screen.getByText('Current theme: dark')).toBeInTheDocument();
+    expect(localStorage.getItem('app-theme')).toBe('dark');
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
   });
 });
