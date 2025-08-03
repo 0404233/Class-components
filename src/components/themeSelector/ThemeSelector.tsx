@@ -8,7 +8,10 @@ export default function ThemeSelector() {
 
   return (
     <div>
-      <div onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
+      <div
+        style={{ cursor: 'pointer' }}
+        onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+      >
         <img src={theme === 'dark' ? sun : moon} alt="theme icon" />
       </div>
     </div>
