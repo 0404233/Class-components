@@ -5,12 +5,14 @@ import ErrorBoundary from './components/errorBoundary/ErrorBoundary.tsx';
 import './index.css';
 import App from './App.tsx';
 import { ThemeProvider } from './context/ThemeContext';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
       retry: 2,
+      refetchOnMount: false,
     },
   },
 });
@@ -27,6 +29,7 @@ createRoot(rootElement).render(
           <App />
         </ThemeProvider>
       </ErrorBoundary>
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </StrictMode>
 );

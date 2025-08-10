@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Search from '../../components/search/Search';
 import CardList from '../../components/cardList/CardList';
 import getApiInfo from '../../api';
@@ -26,6 +26,7 @@ export default function MainPage() {
   const [searchInput, setSearchInput] = useLocalStorage('searchInput', '');
   const [detailsData, setDetailsData] = useState<Item | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   const limit = 10;
   const page = parseInt(searchParams.get('page') || '1', 10);
@@ -103,6 +104,11 @@ export default function MainPage() {
     setSearchParams({ page: page.toString() });
   };
 
+  const clearAllCache = () => {
+    queryClient.clear();
+    refetch();
+  };
+
   return (
     <div className={styles.masterDetailLayout}>
       <div className={styles.leftPane} data-testid="left-pane">
@@ -129,7 +135,10 @@ export default function MainPage() {
           >
             Next
           </button>
-          <button onClick={() => refetch()}>Refresh</button>
+          <div className={styles.cacheButtons}>
+            <button onClick={() => refetch()}>Refresh</button>
+            <button onClick={clearAllCache}>Clear Cache</button>
+          </div>
         </div>
       </div>
       {selectedDetails && (
