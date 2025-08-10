@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Search from '../../components/search/Search';
 import CardList from '../../components/cardList/CardList';
 import getApiInfo from '../../api';
@@ -21,22 +22,42 @@ type PokemonItem = {
 };
 
 export default function MainPage() {
-  const [items, setItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchInput, setSearchInput] = useLocalStorage('searchInput', '');
   const [detailsData, setDetailsData] = useState<Item | null>(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
-  const [searchInput, setSearchInput] = useLocalStorage('searchInput', '');
-  const [searchParams, setSearchParams] = useSearchParams();
+  const queryClient = useQueryClient();
 
   const limit = 10;
   const page = parseInt(searchParams.get('page') || '1', 10);
   const offset = (page - 1) * limit;
   const selectedDetails = searchParams.get('details') || '';
 
-  useEffect(() => {
-    handleSearch(searchInput, offset);
-  }, [page, searchInput]);
+  const {
+    data: items = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
+    queryKey: ['pokemon', searchInput, offset],
+    queryFn: async () => {
+      const results = await getApiInfo(searchInput, offset, limit);
+      return results.map((item: PokemonItem) => ({
+        name: item.name,
+        description:
+          item.base_experience !== undefined
+            ? {
+                base_experience: item.base_experience,
+                height: item.height,
+                is_default: item.is_default,
+                weight: item.weight,
+              }
+            : null,
+      }));
+    },
+    enabled: !selectedDetails,
+  });
 
   useEffect(() => {
     if (selectedDetails) {
@@ -46,42 +67,9 @@ export default function MainPage() {
     }
   }, [selectedDetails]);
 
-  const handleSearch = async (input: string, customOffset = 0) => {
-    setLoading(true);
-    setError(null);
+  const handleSearch = (input: string) => {
     setSearchInput(input);
-
-    try {
-      const results = await getApiInfo(input, customOffset, limit);
-      const mapped = results.map((item: PokemonItem) => {
-        const hasData =
-          item.base_experience !== undefined ||
-          item.height !== undefined ||
-          item.is_default !== undefined ||
-          item.weight !== undefined;
-
-        return {
-          name: item.name,
-          description: hasData
-            ? {
-                base_experience: item.base_experience,
-                height: item.height,
-                is_default: item.is_default,
-                weight: item.weight,
-              }
-            : null,
-        };
-      });
-
-      setItems(mapped);
-    } catch (e) {
-      if (e instanceof Error) {
-        setError(e.message);
-      }
-      setItems([]);
-    } finally {
-      setLoading(false);
-    }
+    refetch();
   };
 
   const fetchDetails = async (name: string) => {
@@ -116,17 +104,22 @@ export default function MainPage() {
     setSearchParams({ page: page.toString() });
   };
 
+  const clearAllCache = () => {
+    queryClient.clear();
+    refetch();
+  };
+
   return (
     <div className={styles.masterDetailLayout}>
       <div className={styles.leftPane} data-testid="left-pane">
-        <Search
-          onSearch={(input) => {
-            handleSearch(input, 0);
-          }}
-        />
-        {loading && <p className={styles.loader} data-testid="loader"></p>}
-        {error && <p className={styles.errorMessage}>{error}</p>}
-        {!loading && !error && (
+        <Search onSearch={handleSearch} />
+        {isLoading && <p className={styles.loader} data-testid="loader"></p>}
+        {isError && (
+          <p className={styles.errorMessage}>
+            {error instanceof Error ? error.message : 'An error occurred'}
+          </p>
+        )}
+        {!isLoading && !isError && (
           <CardList items={items} onCardClick={handleCardClick} />
         )}
         <div className={styles.buttonsBlock}>
@@ -142,6 +135,10 @@ export default function MainPage() {
           >
             Next
           </button>
+          <div className={styles.cacheButtons}>
+            <button onClick={() => refetch()}>Refresh</button>
+            <button onClick={clearAllCache}>Clear Cache</button>
+          </div>
         </div>
       </div>
       {selectedDetails && (

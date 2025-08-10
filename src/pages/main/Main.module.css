@@ -30,6 +30,12 @@
   gap: 12px;
 }
 
+.cacheButtons {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+}
+
 .loader {
   margin: 20px auto;
   transform: rotateZ(45deg);

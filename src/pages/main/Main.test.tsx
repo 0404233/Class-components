@@ -1,223 +1,233 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  within,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Main from './Main';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import MainPage from './Main';
 import '@testing-library/jest-dom';
-import { within } from '@testing-library/react';
 
-const mockData = [
+const mockListData = [
   {
-    name: 'Bulbasaur',
+    name: 'bulbasaur',
     base_experience: 64,
     height: 7,
     is_default: true,
     weight: 69,
   },
+  {
+    name: 'pikachu',
+    base_experience: 112,
+    height: 4,
+    is_default: true,
+    weight: 60,
+  },
 ];
 
+const mockDetailsData = {
+  name: 'bulbasaur',
+  base_experience: 64,
+  height: 7,
+  is_default: true,
+  weight: 69,
+};
+
 vi.mock('../../api', () => ({
+  __esModule: true,
   default: vi.fn(),
 }));
-
 import getApiInfo from '../../api';
+const getApiInfoMock = getApiInfo as unknown as ReturnType<typeof vi.fn>;
 
-const getApiInfoMock = getApiInfo as ReturnType<typeof vi.fn>;
+vi.mock('../../hooks/useLocalStorage', () => ({
+  useLocalStorage: vi.fn(() => ['', vi.fn()]),
+}));
+import { useLocalStorage } from '../../hooks/useLocalStorage';
 
-describe('Main Component', () => {
+describe('MainPage Component', () => {
+  let queryClient: QueryClient;
+
   beforeEach(() => {
-    localStorage.clear();
+    queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false },
+      },
+    });
     vi.clearAllMocks();
+    localStorage.clear();
   });
 
-  it('renders without crashing', async () => {
-    getApiInfoMock.mockResolvedValue(mockData);
-
+  const renderWithProviders = (
+    ui: React.ReactElement,
+    initialEntries = ['/']
+  ) =>
     render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={initialEntries}>{ui}</MemoryRouter>
+      </QueryClientProvider>
     );
 
-    expect(
-      screen.getByPlaceholderText(/write full pokemon name/i)
-    ).toBeInTheDocument();
+  it('shows loader initially', async () => {
+    getApiInfoMock.mockImplementation(() => new Promise(() => {}));
 
-    await waitFor(() => {
-      expect(screen.getByText('Bulbasaur')).toBeInTheDocument();
-    });
-  });
-
-  it('shows loader while loading', async () => {
-    let resolveFn: (value: typeof mockData) => void = () => {};
-    const mockPromise = new Promise<typeof mockData>((resolve) => {
-      resolveFn = resolve;
-    });
-
-    getApiInfoMock.mockReturnValueOnce(mockPromise);
-
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
+    renderWithProviders(<MainPage />);
 
     expect(screen.getByTestId('loader')).toBeInTheDocument();
+  });
 
-    resolveFn(mockData);
+  it('renders fetched pokemon list', async () => {
+    getApiInfoMock.mockResolvedValue(mockListData);
+
+    renderWithProviders(<MainPage />);
+
+    for (const pokemon of mockListData) {
+      await waitFor(() => {
+        expect(screen.getByText(pokemon.name)).toBeInTheDocument();
+      });
+    }
+  });
+
+  it('renders error message on API failure', async () => {
+    getApiInfoMock.mockRejectedValue(new Error('Network error'));
+
+    renderWithProviders(<MainPage />);
 
     await waitFor(() => {
-      expect(screen.queryByTestId('loader')).not.toBeInTheDocument();
+      expect(screen.getByText(/network error/i)).toBeInTheDocument();
     });
   });
 
-  it('shows error message if API fails', async () => {
-    getApiInfoMock.mockRejectedValue(new Error('API ERROR'));
+  it('searches and fetches filtered results', async () => {
+    const setSearchInputMock = vi.fn();
+    const mockedUseLocalStorage = vi.mocked(useLocalStorage);
+    mockedUseLocalStorage.mockReturnValue(['', setSearchInputMock]);
 
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/error/i)).toBeInTheDocument();
+    getApiInfoMock.mockImplementation((input) => {
+      if (input === 'bulbasaur') {
+        return Promise.resolve([
+          {
+            name: 'bulbasaur',
+            base_experience: 64,
+            height: 7,
+            is_default: true,
+            weight: 69,
+          },
+        ]);
+      }
+      return Promise.resolve(mockListData);
     });
-  });
 
-  it('searches and displays result', async () => {
-    getApiInfoMock.mockResolvedValue(mockData);
+    renderWithProviders(<MainPage />);
 
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
-
-    const input = screen.getByPlaceholderText(/write full pokemon name/i);
-    const button = screen.getByRole('button', { name: /search/i });
-
-    fireEvent.change(input, { target: { value: 'Bulbasaur' } });
-    fireEvent.click(button);
-
-    await waitFor(() => {
-      expect(getApiInfoMock).toHaveBeenCalledWith('Bulbasaur', 0, 10);
-    });
-  });
-
-  it('disables Next/Prev buttons when input is filled', async () => {
-    getApiInfoMock.mockResolvedValue(mockData);
-
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
-
-    const input = screen.getByPlaceholderText(/write full pokemon name/i);
+    const searchInput = screen.getByRole('textbox');
     const searchButton = screen.getByRole('button', { name: /search/i });
 
-    fireEvent.change(input, { target: { value: 'Charizard' } });
+    fireEvent.change(searchInput, { target: { value: 'bulbasaur' } });
     fireEvent.click(searchButton);
 
-    const next = screen.getByRole('button', { name: /next/i });
-    const prev = screen.getByRole('button', { name: /prev/i });
-
-    expect(next).toBeDisabled();
-    expect(prev).toBeDisabled();
-  });
-
-  it('navigates using Next and Prev buttons', async () => {
-    getApiInfoMock.mockResolvedValue(mockData);
-
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
-
-    const next = screen.getByRole('button', { name: /next/i });
-    fireEvent.click(next);
+    expect(setSearchInputMock).toHaveBeenCalledWith('bulbasaur');
 
     await waitFor(() => {
-      expect(getApiInfoMock).toHaveBeenCalledWith('', 10, 10);
-    });
-
-    const prev = screen.getByRole('button', { name: /prev/i });
-    fireEvent.click(prev);
-
-    await waitFor(() => {
-      expect(getApiInfoMock).toHaveBeenCalledWith('', 0, 10);
+      expect(screen.getByText('bulbasaur')).toBeInTheDocument();
     });
   });
 
-  it('handles items with missing expected properties', async () => {
-    getApiInfoMock.mockResolvedValue([{ name: 'Unknown' }]);
+  it('shows details panel when a pokemon is selected via URL param', async () => {
+    getApiInfoMock.mockResolvedValueOnce(mockListData);
+    getApiInfoMock.mockResolvedValueOnce([mockDetailsData]);
 
-    render(
-      <MemoryRouter>
-        <Main />
-      </MemoryRouter>
-    );
+    renderWithProviders(<MainPage />, ['/?details=bulbasaur']);
 
     await waitFor(() => {
-      expect(screen.getByText('Unknown')).toBeInTheDocument();
-    });
-  });
-
-  it('Displays details panel when "details" param is present', async () => {
-    getApiInfoMock.mockResolvedValueOnce(mockData);
-    getApiInfoMock.mockResolvedValueOnce(mockData);
-
-    render(
-      <MemoryRouter initialEntries={['/?page=1&details=Bulbasaur']}>
-        <Main />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(screen.getByText(/Loading details/i)).toBeInTheDocument();
+      expect(screen.getByText(/loading details/i)).toBeInTheDocument();
     });
 
     await waitFor(() => {
-      const leftPane = screen.getByTestId('left-pane');
       const rightPane = screen.getByTestId('right-pane');
-
-      expect(within(leftPane).getByText('Bulbasaur')).toBeInTheDocument();
-      expect(within(rightPane).getByText('Bulbasaur')).toBeInTheDocument();
-      expect(
-        within(rightPane).getByText(/Base experience/i)
-      ).toBeInTheDocument();
+      expect(within(rightPane).getByText('bulbasaur')).toBeInTheDocument();
+      expect(within(rightPane).getByText(/64/)).toBeInTheDocument();
+      expect(within(rightPane).getByText(/7/)).toBeInTheDocument();
+      expect(within(rightPane).getByText(/yes/i)).toBeInTheDocument();
+      expect(within(rightPane).getByText(/69/)).toBeInTheDocument();
     });
   });
 
-  it('Closes details panel on "Close" button click', async () => {
-    getApiInfoMock.mockResolvedValueOnce(mockData);
-    getApiInfoMock.mockResolvedValueOnce(mockData);
+  it('closes details panel when Close button clicked', async () => {
+    getApiInfoMock.mockResolvedValueOnce(mockListData);
+    getApiInfoMock.mockResolvedValueOnce([mockDetailsData]);
 
-    render(
-      <MemoryRouter initialEntries={['/?page=1&details=Bulbasaur']}>
-        <Main />
-      </MemoryRouter>
-    );
+    renderWithProviders(<MainPage />, ['/?details=bulbasaur']);
 
     await waitFor(() => {
-      expect(screen.getByText(/Loading details/i)).toBeInTheDocument();
-    });
-
-    await waitFor(() => {
-      const leftPane = screen.getByTestId('left-pane');
-      const rightPane = screen.getByTestId('right-pane');
-
-      expect(within(leftPane).getByText('Bulbasaur')).toBeInTheDocument();
-      expect(within(rightPane).getByText('Bulbasaur')).toBeInTheDocument();
+      expect(screen.getByText(/loading details/i)).toBeInTheDocument();
     });
 
     fireEvent.click(screen.getByRole('button', { name: /close/i }));
 
     await waitFor(() => {
-      const leftPane = screen.getByTestId('left-pane');
-      expect(within(leftPane).getByText('Bulbasaur')).toBeInTheDocument();
-      expect(screen.queryByTestId('right-pane')).toBeNull();
+      expect(screen.queryByTestId('right-pane')).not.toBeInTheDocument();
+    });
+  });
+
+  it('refresh button triggers refetch', async () => {
+    getApiInfoMock.mockResolvedValue(mockListData);
+
+    renderWithProviders(<MainPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('bulbasaur')).toBeInTheDocument();
+    });
+
+    const refreshBtn = screen.getByRole('button', { name: /refresh/i });
+    fireEvent.click(refreshBtn);
+
+    await waitFor(() => {
+      expect(getApiInfoMock).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('disables pagination buttons during search', async () => {
+    const setSearchInputMock = vi.fn();
+    const mockedUseLocalStorage = vi.mocked(useLocalStorage);
+    mockedUseLocalStorage.mockReturnValue(['bulbasaur', setSearchInputMock]);
+
+    getApiInfoMock.mockResolvedValue(mockListData);
+
+    renderWithProviders(<MainPage />);
+
+    await waitFor(() => {
+      const prevBtn = screen.getByRole('button', { name: /prev/i });
+      const nextBtn = screen.getByRole('button', { name: /next/i });
+
+      expect(prevBtn).toBeDisabled();
+      expect(nextBtn).toBeDisabled();
+    });
+  });
+
+  it('maintains search input value after refresh', async () => {
+    const setSearchInputMock = vi.fn();
+    const mockedUseLocalStorage = vi.mocked(useLocalStorage);
+    mockedUseLocalStorage.mockReturnValue(['bulbasaur', setSearchInputMock]);
+
+    getApiInfoMock.mockResolvedValue(mockListData);
+
+    renderWithProviders(<MainPage />);
+
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'bulbasaur' } });
+
+    await waitFor(() => {
+      expect(input).toHaveValue('bulbasaur');
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /refresh/i }));
+
+    await waitFor(() => {
+      expect(input).toHaveValue('bulbasaur');
     });
   });
 });
