@@ -1,0 +1,30 @@
+.card {
+  align-items: center;
+  border-radius: 6px;
+  padding: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 16px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.checkbox {
+  accent-color: #646cff;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+  border-bottom: 1px solid #646cff;
+  font-size: 1.25rem;
+  margin-bottom: 8px;
+}
+
+.card p {
+  margin: 4px 0;
+  font-size: 0.95rem;
+}
