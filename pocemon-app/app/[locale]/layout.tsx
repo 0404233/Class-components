@@ -3,24 +3,27 @@ import { Providers } from '../../components/Providers';
 import { getMessages } from '../../lib/getMessages';
 import Header from '../../components/header/Header';
 import '../globals.css';
+import { notFound } from 'next/navigation';
 
-type Props = {
+type LayoutProps = {
   children: React.ReactNode;
-  params: {
-    locale: string;
-  };
+  params: Promise<{ locale: string }>;
 };
 
-export default async function LocaleLayout({ children, params }: Props) {
+export default async function LocaleLayout({ children, params }: LayoutProps) {
   const { locale } = await params;
   const messages = await getMessages(locale);
+
+  if (!messages) {
+    notFound();
+  }
 
   return (
     <html lang={locale}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
-            <Header></Header>
+            <Header />
             {children}
           </Providers>
         </NextIntlClientProvider>
