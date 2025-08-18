@@ -2,7 +2,8 @@
 
 import { Link } from '../../i18n/navigation';
 import { useTranslations } from 'next-intl';
-import ThemeSelector from '../../components/themeSelector/ThemeSelector';
+import ThemeSelector from '../themeSelector/ThemeSelector';
+import LanguageSwitcher from '../languageSwitcher/LanguageSwitcher';
 import Image from 'next/image';
 import styles from './header.module.css';
 
@@ -17,13 +18,14 @@ export default function Header() {
       </nav>
       <div className={styles.controls}>
         <ThemeSelector />
+        <LanguageSwitcher />
       </div>
       <div className={styles.logo}>
         <Image
           src="/logo.png"
           alt="Logo"
-          width={80}
-          height={80}
+          width={400}
+          height={40}
           className={styles.logoImage}
         />
       </div>
