@@ -1,19 +1,11 @@
-import getApiInfo from '../../../lib/getApiInfo';
-import CardList from '../../../components/cardList/CardList';
-import Search from '../../../components/search/Search';
-import SelectedItemsFlyout from '../../../components/selectItems/SelectItems';
+import { Suspense } from 'react';
+import ClientMain from './ClientMain';
 import styles from './Main.module.css';
 
-export default async function MainPage() {
-  const items = await getApiInfo('', 0, 10);
-
+export default function MainPage() {
   return (
-    <div className={styles.masterDetailLayout}>
-      <div className={styles.leftPane}>
-        <Search />
-        <CardList items={items} />
-        <SelectedItemsFlyout />
-      </div>
-    </div>
+    <Suspense fallback={<div className={styles.loader}></div>}>
+      <ClientMain />
+    </Suspense>
   );
 }

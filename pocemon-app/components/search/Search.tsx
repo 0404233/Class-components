@@ -1,12 +1,15 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter, usePathname } from '../../i18n/navigation';
+import { useTranslations } from 'next-intl';
 import styles from './search.module.css';
 
 export default function Search() {
-  const [searchInput, setSearchInput] = useState(() => {
-    return localStorage.getItem('searchInput') || '';
-  });
+  const [searchInput, setSearchInput] = useState('');
+  const router = useRouter();
+  const pathname = usePathname();
+  const t = useTranslations();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchInput(e.target.value);
@@ -15,14 +18,14 @@ export default function Search() {
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     const trimmed = searchInput.trim();
-    localStorage.setItem('searchInput', trimmed);
+    router.replace(`${pathname}?search=${encodeURIComponent(trimmed)}&page=1`);
   };
 
   return (
     <form className={styles.inputForm}>
       <input
-        placeholder="Write full pokemon name"
-        value={searchInput.replace(/"/g, '')}
+        placeholder={t('SearchPlaceholder')}
+        value={searchInput}
         onChange={handleChange}
         className={styles.inputField}
       />

@@ -1,20 +1,19 @@
-interface PokemonSummary {
-  name: string;
-  url: string;
-}
+import type { Description } from '../types';
 
-interface PokemonDetail {
-  id: number;
+type Item = {
   name: string;
-  height: number;
-  weight: number;
-}
+  description: Description | null;
+};
+
+type Props = {
+  items: Item[];
+};
 
 export default async function getApiInfo(
   searchInput: string,
   offset = 0,
   limit = 10
-): Promise<PokemonDetail[] | PokemonSummary[]> {
+): Promise<Props> {
   const baseUrl = 'https://pokeapi.co/api/v2/pokemon';
   const url = searchInput
     ? `${baseUrl}/${encodeURIComponent(searchInput.toLowerCase().trim())}`
@@ -31,11 +30,40 @@ export default async function getApiInfo(
 
     const data = await response.json();
 
-    const safeData = JSON.parse(JSON.stringify(data));
+    if (searchInput) {
+      const item: Item = {
+        name: data.name,
+        description: {
+          base_experience: data.base_experience,
+          height: data.height,
+          is_default: data.is_default,
+          weight: data.weight,
+        },
+      };
+      return { items: [item] };
+    }
 
-    return searchInput
-      ? [safeData as PokemonDetail]
-      : (safeData.results as PokemonSummary[]);
+    const items: Item[] = await Promise.all(
+      data.results.map(async (result: { name: string; url: string }) => {
+        try {
+          const res = await fetch(result.url);
+          const detail = await res.json();
+          return {
+            name: result.name,
+            description: {
+              base_experience: detail.base_experience,
+              height: detail.height,
+              is_default: detail.is_default,
+              weight: detail.weight,
+            },
+          };
+        } catch {
+          return { name: result.name, description: null };
+        }
+      })
+    );
+
+    return { items };
   } catch (error) {
     console.error('getApiInfo error:', error);
     throw error;
