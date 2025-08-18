@@ -42,6 +42,20 @@ a {
   text-decoration: none;
 }
 
+:root {
+  --text-color: #222;
+  --button-bg: #0070f3;
+  --button-text: #fff;
+  --button-hover: #0059c1;
+}
+
+[data-theme='dark'] {
+  --text-color: #eee;
+  --button-bg: #1e90ff;
+  --button-text: #fff;
+  --button-hover: #4682b4;
+}
+
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;

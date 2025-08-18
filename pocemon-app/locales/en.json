@@ -23,5 +23,9 @@
   "detailsNotFound": "Details not found",
   "loadingDetails": "Loading details...",
   "search": "Search",
-  "selectItem": "Select item"
+  "selectItem": "Select item",
+  "ErrorTitle": "Something went wrong",
+  "ErrorMessage": "An unexpected error occurred. Please try again later.",
+  "pageNotFound": "Page not found",
+  "pageNotFoundMessage": "Sorry, the page you’re looking for doesn’t exist."
 }
