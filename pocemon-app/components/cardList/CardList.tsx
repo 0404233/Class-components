@@ -10,13 +10,18 @@ type Item = {
 
 type Props = {
   items: Item[];
+  onCardClick?: (name: string) => void;
 };
 
-export default function CardList({ items }: Props) {
+export default function CardList({ items, onCardClick }: Props) {
   return (
     <div>
       {items.map((item) => (
-        <Card key={item.name} name={item.name} description={item.description} />
+        <Card
+          key={item.name}
+          name={item.name}
+          onClick={() => onCardClick?.(item.name)}
+        />
       ))}
     </div>
   );

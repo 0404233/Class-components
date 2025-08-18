@@ -4,7 +4,7 @@ import styles from './Main.module.css';
 
 export default function MainPage() {
   return (
-    <Suspense fallback={<div className={styles.loader}></div>}>
+    <Suspense fallback={<p className={styles.loader}></p>}>
       <ClientMain />
     </Suspense>
   );
