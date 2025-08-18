@@ -31,11 +31,11 @@ export default function SelectedItemsFlyout() {
 
   return (
     <div className={styles.selectedItemsBlock}>
-      <div>{t('SelectedItems', { count: selected.length })}</div>
+      <div>{t('selectedItems', { count: selected.length })}</div>
       <div>
-        <button onClick={clearAll}>{t('UnselectAll')}</button>
+        <button onClick={clearAll}>{t('unselectAll')}</button>
         <button onClick={handleDownload} style={{ marginLeft: '10px' }}>
-          {t('Download')}
+          {t('download')}
         </button>
       </div>
     </div>

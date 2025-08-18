@@ -24,12 +24,12 @@ export default function Search() {
   return (
     <form className={styles.inputForm}>
       <input
-        placeholder={t('SearchPlaceholder')}
+        placeholder={t('searchPlaceholder')}
         value={searchInput}
         onChange={handleChange}
         className={styles.inputField}
       />
-      <button onClick={handleClick}>Search</button>
+      <button onClick={handleClick}>{t('search')}</button>
     </form>
   );
 }
