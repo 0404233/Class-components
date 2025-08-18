@@ -1,52 +1,56 @@
 import { create } from 'zustand';
 
-export type SelectedItemsState = {
+const LOCAL_STORAGE_KEY = 'selectedItems';
+
+interface SelectedItemsState {
   selected: Set<string>;
   selectItem: (name: string) => void;
   unselectItem: (name: string) => void;
   clearAll: () => void;
-  setSelected: (names: string[]) => void;
-};
+}
 
-const LOCAL_STORAGE_KEY = 'selectedItems';
+export const useSelectionStore = create<SelectedItemsState>((set) => {
+  let initialSelected: Set<string> = new Set();
 
-export const useSelectionStore = create<SelectedItemsState>((set) => ({
-  selected: new Set(
-    JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) ?? '[]')
-  ),
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (stored) {
+      try {
+        initialSelected = new Set(JSON.parse(stored));
+      } catch {
+        initialSelected = new Set();
+      }
+    }
+  }
 
-  selectItem: (name) => {
-    set((state) => {
-      const newSelected = new Set(state.selected);
-      newSelected.add(name);
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify(Array.from(newSelected))
-      );
-      return { selected: newSelected };
-    });
-  },
+  return {
+    selected: initialSelected,
 
-  unselectItem: (name) => {
-    set((state) => {
-      const newSelected = new Set(state.selected);
-      newSelected.delete(name);
-      localStorage.setItem(
-        LOCAL_STORAGE_KEY,
-        JSON.stringify(Array.from(newSelected))
-      );
-      return { selected: newSelected };
-    });
-  },
+    selectItem: (name) =>
+      set((state) => {
+        const updated = new Set(state.selected).add(name);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...updated]));
+        }
+        return { selected: updated };
+      }),
 
-  clearAll: () => {
-    localStorage.removeItem(LOCAL_STORAGE_KEY);
-    set({ selected: new Set() });
-  },
+    unselectItem: (name) =>
+      set((state) => {
+        const updated = new Set(state.selected);
+        updated.delete(name);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...updated]));
+        }
+        return { selected: updated };
+      }),
 
-  setSelected: (names) => {
-    const newSelected = new Set(names);
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(names));
-    set({ selected: newSelected });
-  },
-}));
+    clearAll: () =>
+      set(() => {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+        }
+        return { selected: new Set() };
+      }),
+  };
+});

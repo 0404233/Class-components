@@ -1,21 +1,28 @@
+'use client';
+
 import { useSelectionStore } from '../../store/useSelectionStore';
+import { useTranslations } from 'next-intl';
 import styles from './SelectedItems.module.css';
 
 export default function SelectedItemsFlyout() {
   const selectedSet = useSelectionStore((state) => state.selected);
   const selected = Array.from(selectedSet);
-  console.log(selected);
   const clearAll = useSelectionStore((state) => state.clearAll);
+  const t = useTranslations();
 
   if (selected.length === 0) return null;
 
-  const handleDownload = () => {
-    const csvRows = selected.map((name) => `"${name}"`);
-    const csvContent = `data:text/csv;charset=utf-8,${csvRows.join('\n')}`;
+  const handleDownload = async () => {
+    const res = await fetch('/api/downloadCsv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ names: selected }),
+    });
 
-    const encodedUri = encodeURI(csvContent);
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = encodedUri;
+    link.href = url;
     link.download = `${selected.length}_items.csv`;
     document.body.appendChild(link);
     link.click();
@@ -24,13 +31,11 @@ export default function SelectedItemsFlyout() {
 
   return (
     <div className={styles.selectedItemsBlock}>
+      <div>{t('SelectedItems', { count: selected.length })}</div>
       <div>
-        {selected.length} item{selected.length > 1 ? 's' : ''} selected
-      </div>
-      <div>
-        <button onClick={clearAll}>Unselect all</button>
+        <button onClick={clearAll}>{t('UnselectAll')}</button>
         <button onClick={handleDownload} style={{ marginLeft: '10px' }}>
-          Download
+          {t('Download')}
         </button>
       </div>
     </div>

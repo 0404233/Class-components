@@ -1,31 +1,33 @@
-// import { createContext, useState, useEffect } from 'react';
-// import type { ReactNode } from 'react';
+'use client';
 
-// type Theme = 'light' | 'dark';
+import { createContext, useState, useEffect } from 'react';
+import type { ReactNode } from 'react';
 
-// type ThemeContextType = {
-//   theme: Theme;
-//   setTheme: (theme: Theme) => void;
-// };
+type Theme = 'light' | 'dark';
 
-// export const ThemeContext = createContext<ThemeContextType>({
-//   theme: 'dark',
-//   setTheme: () => {},
-// });
+type ThemeContextType = {
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
+};
 
-// export function ThemeProvider({ children }: { children: ReactNode }) {
-//   const [theme, setTheme] = useState<Theme>(
-//     (localStorage.getItem('app-theme') as Theme) || 'dark'
-//   );
+export const ThemeContext = createContext<ThemeContextType>({
+  theme: 'dark',
+  setTheme: () => {},
+});
 
-//   useEffect(() => {
-//     localStorage.setItem('app-theme', theme);
-//     document.documentElement.setAttribute('data-theme', theme);
-//   }, [theme]);
+export function ThemeProvider({ children }: { children: ReactNode }) {
+  const [theme, setTheme] = useState<Theme>(
+    (localStorage.getItem('app-theme') as Theme) || 'dark'
+  );
 
-//   return (
-//     <ThemeContext.Provider value={{ theme, setTheme }}>
-//       {children}
-//     </ThemeContext.Provider>
-//   );
-// }
+  useEffect(() => {
+    localStorage.setItem('app-theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
+  );
+}

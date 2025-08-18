@@ -1,17 +1,22 @@
-import type { ReactElement } from 'react';
+'use client';
+
 import Card from '../card/Card';
 import type { Description } from '../../types';
 
-type Props = {
-  items: { name: string; description: Description | null }[];
-  onCardClick?: (name: string) => void;
+type Item = {
+  name: string;
+  description: Description | null;
 };
 
-export default function CardList({ items, onCardClick }: Props): ReactElement {
+type Props = {
+  items: Item[];
+};
+
+export default function CardList({ items }: Props) {
   return (
     <div>
-      {items.map((item, i) => (
-        <Card key={i} {...item} onClick={() => onCardClick?.(item.name)} />
+      {items.map((item) => (
+        <Card key={item.name} name={item.name} description={item.description} />
       ))}
     </div>
   );

@@ -1,24 +1,25 @@
 import { NextIntlClientProvider } from 'next-intl';
-import { ReactNode } from 'react';
-import { notFound } from 'next/navigation';
+import { Providers } from '../../components/Providers';
 import { getMessages } from '../../lib/getMessages';
+
+type Props = {
+  children: React.ReactNode;
+  params: {
+    locale: string;
+  };
+};
 
 export default async function LocaleLayout({
   children,
-  params,
-}: {
-  children: ReactNode;
-  params: { locale: string };
-}) {
-  const { locale } = await params;
+  params: { locale },
+}: Props) {
   const messages = await getMessages(locale);
-  if (!messages) notFound();
 
   return (
     <html lang={locale}>
       <body>
         <NextIntlClientProvider locale={locale} messages={messages}>
-          {children}
+          <Providers>{children}</Providers>
         </NextIntlClientProvider>
       </body>
     </html>

@@ -1,3 +1,5 @@
+'use client';
+
 import React, { Component } from 'react';
 import type { ErrorInfo } from 'react';
 import styles from './errorBoundary.module.css';

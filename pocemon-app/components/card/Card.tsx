@@ -1,4 +1,5 @@
-import type { ReactElement } from 'react';
+'use client';
+
 import styles from './card.module.css';
 import type { Description } from '../../types';
 import { useSelectionStore } from '../../store/useSelectionStore';
@@ -6,14 +7,9 @@ import { useSelectionStore } from '../../store/useSelectionStore';
 type Props = {
   name: string;
   description?: Description | null;
-  onClick?: () => void;
 };
 
-export default function Card({
-  name,
-  description,
-  onClick,
-}: Props): ReactElement {
+export default function Card({ name, description }: Props) {
   const selected = useSelectionStore((state) => state.selected.has(name));
   const selectItem = useSelectionStore((state) => state.selectItem);
   const unselectItem = useSelectionStore((state) => state.unselectItem);
@@ -27,7 +23,7 @@ export default function Card({
   };
 
   return (
-    <div className={styles.card} onClick={onClick}>
+    <div className={styles.card}>
       <input
         className={styles.checkbox}
         type="checkbox"

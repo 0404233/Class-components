@@ -1,12 +1,9 @@
+'use client';
+
 import { useState } from 'react';
-import type { ReactElement } from 'react';
 import styles from './search.module.css';
 
-type Props = {
-  onSearch: (input: string) => void;
-};
-
-export default function Search({ onSearch }: Props): ReactElement {
+export default function Search() {
   const [searchInput, setSearchInput] = useState(() => {
     return localStorage.getItem('searchInput') || '';
   });
@@ -19,7 +16,6 @@ export default function Search({ onSearch }: Props): ReactElement {
     e.preventDefault();
     const trimmed = searchInput.trim();
     localStorage.setItem('searchInput', trimmed);
-    onSearch(trimmed);
   };
 
   return (

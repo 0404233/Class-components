@@ -1,25 +1,32 @@
-// import type { ReactNode, ReactElement } from 'react';
-// import logo from './../../assets/logo.png';
-// import styles from './header.module.css';
-// import { Link } from 'react-router-dom';
-// import ThemeSelector from '../themeSelector/ThemeSelector';
+'use client';
 
-// type Props = {
-//   children?: ReactNode;
-// };
+import { Link } from '../../i18n/navigation';
+import { useTranslations } from 'next-intl';
+import ThemeSelector from '../../components/themeSelector/ThemeSelector';
+import Image from 'next/image';
+import styles from './header.module.css';
 
-// export default function Header({ children }: Props): ReactElement {
-//   return (
-//     <header className={styles.header}>
-//       <nav className={styles.nav}>
-//         <Link to="/">Home</Link>
-//         <Link to="/about">About</Link>
-//       </nav>
-//       {children}
-//       <div className={styles.logo}>
-//         {/* <img src={logo} alt="Logo" className={styles.logoImage} /> */}
-//       </div>
-//       <ThemeSelector />
-//     </header>
-//   );
-// }
+export default function Header() {
+  const t = useTranslations();
+
+  return (
+    <header className={styles.header}>
+      <nav className={styles.nav}>
+        <Link href="/">{t('Home')}</Link>
+        <Link href="/about">{t('About')}</Link>
+      </nav>
+      <div className={styles.controls}>
+        <ThemeSelector />
+      </div>
+      <div className={styles.logo}>
+        <Image
+          src="/logo.png"
+          alt="Logo"
+          width={80}
+          height={80}
+          className={styles.logoImage}
+        />
+      </div>
+    </header>
+  );
+}
